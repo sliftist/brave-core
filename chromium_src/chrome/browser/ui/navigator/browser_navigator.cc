@@ -6,9 +6,12 @@
 #include <string_view>
 
 #include "brave/browser/ui/brave_ui_features.h"
+#include "brave/components/constants/enhanced_phishing_protection.h"
 #include "brave/components/containers/buildflags/buildflags.h"
+#include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/tab_contents/tab_util.h"
 #include "chrome/browser/ui/navigator/browser_navigator_params.h"
+#include "components/prefs/pref_service.h"
 #include "content/public/common/url_constants.h"
 #include "url/gurl.h"
 
@@ -28,9 +31,20 @@ void UpdateBraveScheme(NavigateParams* params) {
   }
 }
 
+bool IsEnhancedPhishingProtectionEnabled(const NavigateParams* params) {
+  Profile* profile = params->initiating_profile;
+  return profile && profile->GetPrefs() &&
+         profile->GetPrefs()->GetBoolean(kEnhancedPhishingProtectionEnabled);
+}
+
 void MaybeOverridePopupDisposition(NavigateParams* params) {
-  if (base::FeatureList::IsEnabled(features::kForcePopupToBeOpenedAsTab) &&
-      params->disposition == WindowOpenDisposition::NEW_POPUP) {
+  if (params->disposition != WindowOpenDisposition::NEW_POPUP) {
+    return;
+  }
+  // Force popups to open as tabs when Enhanced Phishing Protection is on (so a
+  // page can't spawn a separate window) or when the legacy feature is enabled.
+  if (IsEnhancedPhishingProtectionEnabled(params) ||
+      base::FeatureList::IsEnabled(features::kForcePopupToBeOpenedAsTab)) {
     params->disposition = WindowOpenDisposition::NEW_FOREGROUND_TAB;
   }
 }

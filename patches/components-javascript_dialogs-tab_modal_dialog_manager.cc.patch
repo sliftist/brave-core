@@ -1,8 +1,17 @@
 diff --git a/components/javascript_dialogs/tab_modal_dialog_manager.cc b/components/javascript_dialogs/tab_modal_dialog_manager.cc
-index 7c6cf376decfd31b108d1b93081c9c2b910edcdf..0db7cbf2d223800a7e497f07610d81b907f13712 100644
+index 7c6cf376decfd31b108d1b93081c9c2b910edcdf..cdfeca39d3a0300ac6afffad54f990a369b38fa5 100644
 --- a/components/javascript_dialogs/tab_modal_dialog_manager.cc
 +++ b/components/javascript_dialogs/tab_modal_dialog_manager.cc
-@@ -253,6 +253,7 @@ void TabModalDialogManager::CancelDialogs(content::WebContents* web_contents,
+@@ -217,6 +217,8 @@ void TabModalDialogManager::RunBeforeUnloadDialog(
+   DCHECK_EQ(web_contents,
+             content::WebContents::FromRenderFrameHost(render_frame_host));
+ 
++  BRAVE_TAB_MODAL_DIALOG_MANAGER_RUN_BEFORE_UNLOAD_DIALOG
++
+   // onbeforeunload dialogs are always handled with an app-modal dialog, because
+   // - they are critical to the user not losing data
+   // - they can be requested for tabs that are not foremost
+@@ -253,6 +255,7 @@ void TabModalDialogManager::CancelDialogs(content::WebContents* web_contents,
  
  void TabModalDialogManager::OnVisibilityChanged(
      content::Visibility visibility) {

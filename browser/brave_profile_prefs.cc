@@ -38,6 +38,7 @@
 #include "brave/components/brave_vpn/common/buildflags/buildflags.h"
 #include "brave/components/brave_wallet/common/buildflags/buildflags.h"
 #include "brave/components/brave_wayback_machine/buildflags/buildflags.h"
+#include "brave/components/constants/enhanced_phishing_protection.h"
 #include "brave/components/constants/pref_names.h"
 #include "brave/components/de_amp/common/pref_names.h"
 #include "brave/components/debounce/core/browser/debounce_service.h"
@@ -299,6 +300,10 @@ void RegisterProfilePrefsForMigration(
 
   // Restore "Other Bookmarks" migration
   registry->RegisterBooleanPref(kOtherBookmarksMigrated, false);
+
+  // Enhanced Phishing Protection (brave://settings): auto-dismiss beforeunload
+  // dialogs and force popups to open as tabs. Enabled by default.
+  registry->RegisterBooleanPref(kEnhancedPhishingProtectionEnabled, true);
 
 #if BUILDFLAG(ENABLE_BRAVE_NEWS)
   // Added 05/2021

@@ -8,6 +8,7 @@
 #include "brave/browser/ui/tabs/brave_tab_prefs.h"
 #include "brave/common/pref_names.h"
 #include "brave/components/ai_chat/core/common/pref_names.h"
+#include "brave/components/constants/enhanced_phishing_protection.h"
 #include "brave/components/brave_news/common/buildflags/buildflags.h"
 #include "brave/components/brave_rewards/core/pref_names.h"
 #include "brave/components/brave_shields/core/common/pref_names.h"
@@ -100,6 +101,9 @@ const PrefsUtil::TypedPrefMap& BravePrefsUtil::GetAllowlistedKeys() {
   (*s_brave_allowlist)[kImportDialogExtensions] =
       settings_api::PrefType::kBoolean;
   (*s_brave_allowlist)[kImportDialogPayments] =
+      settings_api::PrefType::kBoolean;
+  // Enhanced Phishing Protection
+  (*s_brave_allowlist)[kEnhancedPhishingProtectionEnabled] =
       settings_api::PrefType::kBoolean;
   // Default Brave shields
   (*s_brave_allowlist)[kShieldsAdvancedViewEnabled] =

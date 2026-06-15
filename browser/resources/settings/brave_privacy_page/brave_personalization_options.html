@@ -58,6 +58,12 @@
 </template>
 <settings-toggle-button
   class="cr-row"
+  pref="{{prefs.brave.enhanced_phishing_protection.enabled}}"
+  label="$i18n{enhancedPhishingProtectionLabel}"
+  sub-label="$i18n{enhancedPhishingProtectionSubLabel}">
+</settings-toggle-button>
+<settings-toggle-button
+  class="cr-row"
   pref="{{prefs.brave.reduce_language}}"
   label="$i18n{reduceLanguageControlLabel}"
   sub-label="$i18n{reduceLanguageDesc}">

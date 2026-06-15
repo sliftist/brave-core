@@ -1,0 +1,18 @@
+diff --git a/components/javascript_dialogs/BUILD.gn b/components/javascript_dialogs/BUILD.gn
+index 9dedab8f86895a2a1aa60c752db8a54af0c6f5ab..8fb0365b4b26080de34e595625f38803ca032cb4 100644
+--- a/components/javascript_dialogs/BUILD.gn
++++ b/components/javascript_dialogs/BUILD.gn
+@@ -23,10 +23,13 @@ static_library("javascript_dialogs") {
+ 
+   deps = [
+     "//base",
++    "//brave/components/constants",
+     "//components/javascript_dialogs/core:util",
+     "//components/navigation_metrics/",
++    "//components/prefs",
+     "//components/strings",
+     "//components/ukm/content",
++    "//components/user_prefs",
+     "//content/public/browser",
+     "//content/public/common",
+     "//net",
