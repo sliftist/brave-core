@@ -25,6 +25,7 @@ source_set("constants") {
     "enhanced_phishing_protection.h",
     "network_constants.h",
     "pref_names.h",
+    "trace_tools.h",
     "url_constants.h",
     "webui_url_constants.h",
   ]

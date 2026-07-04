@@ -27,6 +27,7 @@ import("//brave/browser/request_otr/sources.gni")
 import("//brave/browser/search_engines/sources.gni")
 import("//brave/browser/sync/sources.gni")
 import("//brave/browser/themes/sources.gni")
+import("//brave/browser/trace_tools/sources.gni")
 import("//brave/browser/ui/config.gni")
 import("//brave/browser/updater/buildflags.gni")
 import("//brave/browser/url_sanitizer/sources.gni")
@@ -752,6 +753,7 @@ brave_chrome_browser_sources += brave_browser_request_otr_sources
 brave_chrome_browser_sources += brave_browser_search_engines_sources
 brave_chrome_browser_sources += brave_browser_sync_sources
 brave_chrome_browser_sources += brave_browser_themes_sources
+brave_chrome_browser_sources += brave_browser_trace_tools_sources
 brave_chrome_browser_sources += brave_browser_url_sanitizer_sources
 brave_chrome_browser_sources += brave_browser_web_discovery_sources
 brave_chrome_browser_sources += brave_browser_webcompat_reporter_sources
@@ -776,6 +778,7 @@ brave_chrome_browser_deps += brave_browser_request_otr_deps
 brave_chrome_browser_deps += brave_browser_search_engines_deps
 brave_chrome_browser_deps += brave_browser_sync_deps
 brave_chrome_browser_deps += brave_browser_themes_deps
+brave_chrome_browser_deps += brave_browser_trace_tools_deps
 brave_chrome_browser_deps += brave_browser_url_sanitizer_deps
 brave_chrome_browser_deps += brave_browser_web_discovery_deps
 brave_chrome_browser_deps += brave_browser_webcompat_reporter_deps

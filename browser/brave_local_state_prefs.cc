@@ -26,6 +26,7 @@
 #include "brave/components/brave_vpn/common/buildflags/buildflags.h"
 #include "brave/components/brave_wallet/common/buildflags/buildflags.h"
 #include "brave/components/constants/pref_names.h"
+#include "brave/components/constants/trace_tools.h"
 #include "brave/components/l10n/common/prefs.h"
 #include "brave/components/misc_metrics/general_browser_usage.h"
 #include "brave/components/misc_metrics/page_metrics.h"
@@ -161,6 +162,9 @@ void RegisterLocalStatePrefsForMigration(PrefRegistrySimple* registry) {
 
 void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
   brave_shields::RegisterPrefsForAdBlockService(registry);
+  // Trace-tools MCP HTTP server (browser-process-global dev tooling).
+  registry->RegisterIntegerPref(kTraceToolsMcpPort, kTraceToolsDefaultMcpPort);
+  registry->RegisterBooleanPref(kTraceToolsMcpEnabled, true);
   // `kStatsReportingEnabled` is the user/policy-facing opt-in for anonymous
   // usage pings. It is read by other systems (privacy settings UI, policy
   // map, referrals service, SERP tab helper, Brave Origin service) that
