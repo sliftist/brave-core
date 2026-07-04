@@ -684,6 +684,8 @@ source_set("ui") {
       "views/toolbar/brave_app_menu.h",
       "views/toolbar/brave_browser_app_menu_button.cc",
       "views/toolbar/brave_browser_app_menu_button.h",
+      "views/toolbar/dump_toolbar_button.cc",
+      "views/toolbar/dump_toolbar_button.h",
       "views/toolbar/mcp_copy_bubble.cc",
       "views/toolbar/mcp_copy_bubble.h",
       "views/toolbar/mcp_indicator_view.cc",

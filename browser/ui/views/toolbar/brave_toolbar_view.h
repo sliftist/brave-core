@@ -25,6 +25,7 @@ class BraveVPNButton;
 #endif
 
 class BraveBookmarkButton;
+class DumpToolbarButton;
 class MCPIndicatorView;
 class SidePanelButton;
 class ToolbarButton;
@@ -96,6 +97,7 @@ class BraveToolbarView : public ToolbarView,
 
   raw_ptr<ToolbarButton> vertical_tab_toggle_ = nullptr;
   raw_ptr<TraceToolbarButton> trace_button_ = nullptr;
+  raw_ptr<DumpToolbarButton> dump_button_ = nullptr;
   raw_ptr<MCPIndicatorView> mcp_indicator_ = nullptr;
   raw_ptr<BraveBookmarkButton> bookmark_ = nullptr;
   // Tracks the preference to determine whether bookmark editing is allowed.

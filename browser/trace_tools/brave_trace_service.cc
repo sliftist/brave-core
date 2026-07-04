@@ -10,6 +10,7 @@
 #include "base/functional/bind.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/thread_pool.h"
+#include "brave/browser/trace_tools/dump_recorder.h"
 #include "brave/browser/trace_tools/mcp_server.h"
 #include "brave/browser/trace_tools/network_trace_recorder.h"
 #include "brave/components/constants/trace_tools.h"
@@ -57,6 +58,40 @@ void BraveTraceService::ToggleDomainTrace(const std::string& domain) {
 
 bool BraveTraceService::IsDomainTraced(const std::string& domain) const {
   return recorder_ && recorder_->IsDomainTraced(domain);
+}
+
+DumpRecorder* BraveTraceService::GetDumpRecorder() {
+  if (!dump_recorder_) {
+    dump_recorder_ = std::make_unique<DumpRecorder>();
+  }
+  return dump_recorder_.get();
+}
+
+void BraveTraceService::ToggleDomainDump(const std::string& domain) {
+  if (domain.empty()) {
+    return;
+  }
+  DumpRecorder* recorder = GetDumpRecorder();
+  recorder->SetDomainArmed(domain, !recorder->IsDomainArmed(domain));
+  NotifyDumpStateChanged();
+}
+
+bool BraveTraceService::IsDomainDumpArmed(const std::string& domain) const {
+  return dump_recorder_ && dump_recorder_->IsDomainArmed(domain);
+}
+
+int BraveTraceService::GetDumpFileCount(const std::string& domain) const {
+  return dump_recorder_ ? dump_recorder_->GetProgress(domain).files : 0;
+}
+
+int64_t BraveTraceService::GetDumpByteCount(const std::string& domain) const {
+  return dump_recorder_ ? dump_recorder_->GetProgress(domain).bytes : 0;
+}
+
+void BraveTraceService::NotifyDumpStateChanged() {
+  for (Observer& observer : observers_) {
+    observer.OnDumpStateChanged();
+  }
 }
 
 void BraveTraceService::EnsureMcpServer() {

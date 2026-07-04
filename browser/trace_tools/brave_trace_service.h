@@ -19,6 +19,7 @@
 
 namespace trace_tools {
 
+class DumpRecorder;
 class MCPServer;
 class NetworkTraceRecorder;
 
@@ -36,6 +37,9 @@ class BraveTraceService {
     // Fired when the MCP server binds its port or its active session count
     // changes; drives the toolbar connection indicator.
     virtual void OnMcpStateChanged() {}
+    // Fired when a domain is armed/disarmed for dumping or its running file
+    // count/size changes; drives the toolbar Dump button.
+    virtual void OnDumpStateChanged() {}
   };
 
   static BraveTraceService* GetInstance();
@@ -49,6 +53,16 @@ class BraveTraceService {
   // Toggles network tracing for `domain` (eTLD+1) and notifies observers.
   void ToggleDomainTrace(const std::string& domain);
   bool IsDomainTraced(const std::string& domain) const;
+
+  // Arms/disarms JS+HTML dumping for `domain` and notifies observers.
+  void ToggleDomainDump(const std::string& domain);
+  bool IsDomainDumpArmed(const std::string& domain) const;
+  // Running (or last-completed) dump file count / byte total for `domain`.
+  int GetDumpFileCount(const std::string& domain) const;
+  int64_t GetDumpByteCount(const std::string& domain) const;
+
+  // Called by DumpRecorder (UI thread) when dump progress changes.
+  void NotifyDumpStateChanged();
 
   // Starts the MCP HTTP server if not already running. Safe to call repeatedly.
   void EnsureMcpServer();
@@ -72,6 +86,7 @@ class BraveTraceService {
   friend class base::NoDestructor<BraveTraceService>;
 
   NetworkTraceRecorder* GetRecorder();
+  DumpRecorder* GetDumpRecorder();
 
   void OnMcpPortBound(uint16_t port);
   void OnMcpSessionCountChanged(int count);
@@ -79,6 +94,7 @@ class BraveTraceService {
 
   scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
   std::unique_ptr<NetworkTraceRecorder> recorder_;
+  std::unique_ptr<DumpRecorder> dump_recorder_;
   std::unique_ptr<MCPServer> mcp_server_;
   uint16_t mcp_port_ = 0;
   int mcp_session_count_ = 0;
