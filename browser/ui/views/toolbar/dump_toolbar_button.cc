@@ -77,25 +77,42 @@ void DumpToolbarButton::UpdateState() {
 
   auto* service = trace_tools::BraveTraceService::GetInstance();
   const std::string domain = GetActiveDomain();
+  if (!domain.empty()) {
+    // Discover this domain's patch rules so the count below is populated.
+    service->EnsurePatchesForDomain(domain);
+  }
   const bool armed =
       !domain.empty() && service->IsDomainDumpArmed(domain);
   const int files = domain.empty() ? 0 : service->GetDumpFileCount(domain);
   const int64_t bytes = domain.empty() ? 0 : service->GetDumpByteCount(domain);
 
+  std::u16string label;
   if (armed) {
-    SetText(base::StrCat({u"Dumping ", base::NumberToString16(files), u" (",
-                          FormatSize(bytes), u")"}));
+    label = base::StrCat({u"Dumping ", base::NumberToString16(files), u" (",
+                          FormatSize(bytes), u")"});
     SetEnabledTextColors(std::optional<SkColor>(kArmedColor));
     SetTooltipText(u"Stop dumping JS + HTML for this site");
   } else if (files > 0) {
-    SetText(base::StrCat({u"Dumped ", base::NumberToString16(files)}));
+    label = base::StrCat({u"Dumped ", base::NumberToString16(files)});
     SetEnabledTextColors(std::nullopt);
     SetTooltipText(u"Dump JS + HTML for this site to disk");
   } else {
-    SetText(u"Dump");
+    label = u"Dump";
     SetEnabledTextColors(std::nullopt);
     SetTooltipText(u"Dump all JS + HTML for this site to disk");
   }
+
+  const int patches = domain.empty() ? 0 : service->GetPatchCount(domain);
+  if (patches > 0) {
+    const int replaced = service->GetPatchReplacedCount(domain);
+    label = base::StrCat({label, u" | ", base::NumberToString16(patches),
+                          u" patch", patches == 1 ? u"" : u"es"});
+    if (replaced > 0) {
+      label = base::StrCat({label, u", ", base::NumberToString16(replaced),
+                            u" replaced"});
+    }
+  }
+  SetText(label);
 }
 
 void DumpToolbarButton::OnTabStripModelChanged(
@@ -114,6 +131,10 @@ void DumpToolbarButton::DidFinishNavigation(
 }
 
 void DumpToolbarButton::OnDumpStateChanged() {
+  UpdateState();
+}
+
+void DumpToolbarButton::OnPatchStateChanged() {
   UpdateState();
 }
 

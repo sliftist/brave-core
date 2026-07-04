@@ -45,6 +45,7 @@ class DumpToolbarButton : public ToolbarButton,
 
   // trace_tools::BraveTraceService::Observer:
   void OnDumpStateChanged() override;
+  void OnPatchStateChanged() override;
 
  private:
   void OnPressed();

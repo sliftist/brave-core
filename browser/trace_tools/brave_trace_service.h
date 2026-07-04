@@ -8,6 +8,7 @@
 
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 
 #include "base/memory/scoped_refptr.h"
@@ -22,6 +23,8 @@ namespace trace_tools {
 class DumpRecorder;
 class MCPServer;
 class NetworkTraceRecorder;
+class PatchEngine;
+class PatchRecorder;
 
 // Browser-process-global owner of all trace-tools state (network tracing, the
 // MCP HTTP server, JS/HTML dumping and live patches). Lives for the life of the
@@ -40,6 +43,8 @@ class BraveTraceService {
     // Fired when a domain is armed/disarmed for dumping or its running file
     // count/size changes; drives the toolbar Dump button.
     virtual void OnDumpStateChanged() {}
+    // Fired when a domain's live patch rule set or match/replace counts change.
+    virtual void OnPatchStateChanged() {}
   };
 
   static BraveTraceService* GetInstance();
@@ -64,6 +69,20 @@ class BraveTraceService {
   // Called by DumpRecorder (UI thread) when dump progress changes.
   void NotifyDumpStateChanged();
 
+  // Live patches. Rules live on disk under ~/browser-traces/<domain>/patches/.
+  // Ensures a (cached) scan of the domain's patch folder has been requested.
+  void EnsurePatchesForDomain(const std::string& domain);
+  // Number of real patch rules cached for `domain`.
+  int GetPatchCount(const std::string& domain) const;
+  // Cumulative match / replace counts for `domain` this session.
+  int GetPatchMatchedCount(const std::string& domain) const;
+  int GetPatchReplacedCount(const std::string& domain) const;
+  // Applies `domain`'s rules to `body`; returns the rewritten body or nullopt.
+  std::optional<std::string> ApplyPatches(const std::string& domain,
+                                          const std::string& body);
+  // Called by PatchEngine (UI thread) when patch state changes.
+  void NotifyPatchStateChanged();
+
   // Starts the MCP HTTP server if not already running. Safe to call repeatedly.
   void EnsureMcpServer();
   // Actual bound port (0 until the socket is bound / if the server is off).
@@ -87,6 +106,14 @@ class BraveTraceService {
 
   NetworkTraceRecorder* GetRecorder();
   DumpRecorder* GetDumpRecorder();
+  PatchEngine* GetPatchEngine();
+  // Lazily creates the per-tab live-patch DevTools sessions. Created as soon as
+  // a toolbar observer registers (i.e. at browser startup) so patches for
+  // domains with existing rules are live without any user action.
+  PatchRecorder* GetPatchRecorder();
+  // Posted (never run synchronously) so re-attaching/detaching tab sessions
+  // can't happen while the DevTools backend is delivering a Fetch reply.
+  void ReevaluatePatchTabs();
 
   void OnMcpPortBound(uint16_t port);
   void OnMcpSessionCountChanged(int count);
@@ -95,6 +122,8 @@ class BraveTraceService {
   scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
   std::unique_ptr<NetworkTraceRecorder> recorder_;
   std::unique_ptr<DumpRecorder> dump_recorder_;
+  std::unique_ptr<PatchEngine> patch_engine_;
+  std::unique_ptr<PatchRecorder> patch_recorder_;
   std::unique_ptr<MCPServer> mcp_server_;
   uint16_t mcp_port_ = 0;
   int mcp_session_count_ = 0;
