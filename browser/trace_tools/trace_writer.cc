@@ -10,8 +10,8 @@
 #include <utility>
 
 #include "base/containers/span.h"
+#include "base/files/file_util.h"
 #include "base/json/json_writer.h"
-#include "base/memory/ptr_util.h"
 #include "base/numerics/byte_conversions.h"
 
 namespace trace_tools {
@@ -28,32 +28,25 @@ std::string SerializeJson(const base::DictValue& dict) {
 
 }  // namespace
 
-TraceWriter::TraceWriter(base::File file) : file_(std::move(file)) {}
-
-TraceWriter::~TraceWriter() = default;
-
-// static
-std::unique_ptr<TraceWriter> TraceWriter::Create(const base::FilePath& path,
-                                                 base::DictValue header) {
-  base::File file(path,
-                  base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
-  if (!file.IsValid()) {
-    return nullptr;
+TraceWriter::TraceWriter(base::FilePath path, base::DictValue header) {
+  base::CreateDirectory(path.DirName());
+  file_.Initialize(path,
+                   base::File::FLAG_CREATE_ALWAYS | base::File::FLAG_WRITE);
+  if (!file_.IsValid()) {
+    return;
   }
-
-  auto writer = base::WrapUnique(new TraceWriter(std::move(file)));
 
   const std::string header_json = SerializeJson(header);
   const std::array<uint8_t, 4> header_len =
       base::U32ToLittleEndian(header_json.size());
 
-  if (!writer->WriteAll(base::span(kMagic)) ||
-      !writer->WriteAll(base::span(header_len)) ||
-      !writer->WriteAll(base::as_byte_span(header_json))) {
-    return nullptr;
+  if (!WriteAll(base::span(kMagic)) || !WriteAll(base::span(header_len)) ||
+      !WriteAll(base::as_byte_span(header_json))) {
+    file_.Close();
   }
-  return writer;
 }
+
+TraceWriter::~TraceWriter() = default;
 
 bool TraceWriter::WriteAll(base::span<const uint8_t> data) {
   if (data.empty()) {
@@ -66,22 +59,23 @@ bool TraceWriter::WriteAll(base::span<const uint8_t> data) {
   return true;
 }
 
-bool TraceWriter::AppendRecord(uint8_t type,
-                               const base::DictValue& meta,
-                               base::span<const uint8_t> body) {
-  if (cap_reached_ || finalized_) {
-    return false;
+void TraceWriter::AppendRecord(uint8_t type,
+                               base::DictValue meta,
+                               std::vector<uint8_t> body) {
+  if (!file_.IsValid() || cap_reached_ || finalized_) {
+    return;
   }
 
   const std::string meta_json = SerializeJson(meta);
   // record_length counts everything after the record_length field itself:
   // type(1) + meta_len(4) + meta + body.
-  const int64_t record_len =
-      1 + 4 + static_cast<int64_t>(meta_json.size()) + body.size();
+  const int64_t record_len = 1 + 4 +
+                             static_cast<int64_t>(meta_json.size()) +
+                             static_cast<int64_t>(body.size());
 
   if (total_bytes_ + 4 + record_len > kMaxTraceBytes) {
     cap_reached_ = true;
-    return false;
+    return;
   }
 
   const std::array<uint8_t, 4> record_len_le =
@@ -90,18 +84,16 @@ bool TraceWriter::AppendRecord(uint8_t type,
   const std::array<uint8_t, 4> meta_len_le =
       base::U32ToLittleEndian(meta_json.size());
 
-  if (!WriteAll(base::span(record_len_le)) ||
-      !WriteAll(base::span(type_byte)) || !WriteAll(base::span(meta_len_le)) ||
-      !WriteAll(base::as_byte_span(meta_json)) || !WriteAll(body)) {
+  if (!WriteAll(base::span(record_len_le)) || !WriteAll(base::span(type_byte)) ||
+      !WriteAll(base::span(meta_len_le)) ||
+      !WriteAll(base::as_byte_span(meta_json)) || !WriteAll(base::span(body))) {
     // Partial write: treat as capped to stop further appends.
     cap_reached_ = true;
-    return false;
   }
-  return true;
 }
 
 void TraceWriter::Finalize(base::DictValue end_meta) {
-  if (finalized_) {
+  if (!file_.IsValid() || finalized_) {
     return;
   }
   // Force the end record through even if the cap was hit, so readers always see
@@ -110,7 +102,7 @@ void TraceWriter::Finalize(base::DictValue end_meta) {
   cap_reached_ = false;
   end_meta.Set("total_bytes", static_cast<double>(total_bytes_));
   end_meta.Set("cap_reached", was_capped);
-  AppendRecord(kRecordTraceEnd, end_meta, {});
+  AppendRecord(kRecordTraceEnd, std::move(end_meta), {});
   finalized_ = true;
   file_.Flush();
 }

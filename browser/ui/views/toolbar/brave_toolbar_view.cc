@@ -24,6 +24,7 @@
 #include "brave/browser/ui/views/location_bar/brave_location_bar_view.h"
 #include "brave/browser/ui/views/tabs/vertical_tab_utils.h"
 #include "brave/browser/ui/views/toolbar/bookmark_button.h"
+#include "brave/browser/ui/views/toolbar/trace_toolbar_button.h"
 #include "brave/browser/ui/views/toolbar/side_panel_button.h"
 #include "brave/components/ai_chat/core/common/buildflags/buildflags.h"
 #include "brave/components/brave_vpn/common/buildflags/buildflags.h"
@@ -299,12 +300,6 @@ void BraveToolbarView::Init() {
 #endif  // BUILDFLAG(IS_LINUX)
   }
 
-  const auto callback = [](Browser* browser, int command,
-                           const ui::Event& event) {
-    chrome::ExecuteCommandWithDisposition(
-        browser, command, ui::DispositionFromEventFlags(event.flags()));
-  };
-
   // Add vertical tab toggle button to the left of the back button.
   if (tabs::utils::SupportsBraveVerticalTabs(browser_)) {
     auto back_button_index = GetIndexOf(back_);
@@ -321,14 +316,13 @@ void BraveToolbarView::Init() {
     UpdateVerticalTabToggleState();
   }
 
-  bookmark_ =
-      AddChildViewAt(std::make_unique<BraveBookmarkButton>(base::BindRepeating(
-                         callback, browser_, IDC_BOOKMARK_THIS_TAB)),
-                     *GetIndexOf(location_bar_view_));
-  bookmark_->SetTriggerableEventFlags(ui::EF_LEFT_MOUSE_BUTTON |
-                                      ui::EF_MIDDLE_MOUSE_BUTTON);
-  bookmark_->UpdateImageAndText();
-  SetBraveButtonFlexBehavior(bookmark_);
+  // The bookmark star is replaced by the Trace button (network-to-disk
+  // recording). `bookmark_` is intentionally left null; all remaining uses are
+  // null-guarded.
+  trace_button_ = AddChildViewAt(
+      std::make_unique<TraceToolbarButton>(browser_),
+      *GetIndexOf(location_bar_view_));
+  SetBraveButtonFlexBehavior(trace_button_);
 
   side_panel_ = AddChildViewAt(std::make_unique<SidePanelButton>(browser()),
                                *GetIndexOf(app_menu_button()) - 1);

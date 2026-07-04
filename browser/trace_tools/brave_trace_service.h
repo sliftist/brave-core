@@ -6,6 +6,7 @@
 #ifndef BRAVE_BROWSER_TRACE_TOOLS_BRAVE_TRACE_SERVICE_H_
 #define BRAVE_BROWSER_TRACE_TOOLS_BRAVE_TRACE_SERVICE_H_
 
+#include <memory>
 #include <string>
 
 #include "base/memory/scoped_refptr.h"
@@ -15,6 +16,8 @@
 #include "base/task/sequenced_task_runner.h"
 
 namespace trace_tools {
+
+class NetworkTraceRecorder;
 
 // Browser-process-global owner of all trace-tools state (network tracing, the
 // MCP HTTP server, JS/HTML dumping and live patches). Lives for the life of the
@@ -37,6 +40,10 @@ class BraveTraceService {
   void AddObserver(Observer* observer);
   void RemoveObserver(Observer* observer);
 
+  // Toggles network tracing for `domain` (eTLD+1) and notifies observers.
+  void ToggleDomainTrace(const std::string& domain);
+  bool IsDomainTraced(const std::string& domain) const;
+
   // Shared blocking sequence for all trace-tools disk IO.
   scoped_refptr<base::SequencedTaskRunner> io_task_runner() {
     return io_task_runner_;
@@ -51,7 +58,10 @@ class BraveTraceService {
  private:
   friend class base::NoDestructor<BraveTraceService>;
 
+  NetworkTraceRecorder* GetRecorder();
+
   scoped_refptr<base::SequencedTaskRunner> io_task_runner_;
+  std::unique_ptr<NetworkTraceRecorder> recorder_;
   base::ObserverList<Observer> observers_;
 };
 

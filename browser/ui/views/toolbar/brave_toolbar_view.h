@@ -27,6 +27,7 @@ class BraveVPNButton;
 class BraveBookmarkButton;
 class SidePanelButton;
 class ToolbarButton;
+class TraceToolbarButton;
 class WalletButton;
 
 class BraveToolbarView : public ToolbarView,
@@ -93,6 +94,7 @@ class BraveToolbarView : public ToolbarView,
   ToolbarDivider* toolbar_divider_for_testing() { return toolbar_divider_; }
 
   raw_ptr<ToolbarButton> vertical_tab_toggle_ = nullptr;
+  raw_ptr<TraceToolbarButton> trace_button_ = nullptr;
   raw_ptr<BraveBookmarkButton> bookmark_ = nullptr;
   // Tracks the preference to determine whether bookmark editing is allowed.
   BooleanPrefMember edit_bookmarks_enabled_;
