@@ -22,6 +22,7 @@ import { SettingsToggleButtonElement } from '../controls/settings_toggle_button.
 
 import '../controls/settings_dropdown_menu.js'
 import '../privacy_page/do_not_track_toggle.js'
+import 'chrome://resources/cr_elements/cr_input/cr_input.js'
 
 const SettingsBravePersonalizationOptionsBase = WebUiListenerMixin(
   PolymerElement,
@@ -180,6 +181,17 @@ export class SettingsBravePersonalizationOptions extends SettingsBravePersonaliz
   restartBrowser_(e: Event) {
     e.stopPropagation()
     window.open('chrome://restart', '_self')
+  }
+
+  onMcpPortChange_(e: Event) {
+    const input = e.target as HTMLInputElement
+    const port = parseInt(input.value, 10)
+    if (!isNaN(port) && port >= 1 && port <= 65535) {
+      this.set('prefs.brave.trace_tools.mcp_port.value', port)
+    } else {
+      // Reject out-of-range input; restore the field to the stored value.
+      input.value = String(this.get('prefs.brave.trace_tools.mcp_port.value'))
+    }
   }
 
   override ready() {

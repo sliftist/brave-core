@@ -9,6 +9,7 @@
 #include "brave/common/pref_names.h"
 #include "brave/components/ai_chat/core/common/pref_names.h"
 #include "brave/components/constants/enhanced_phishing_protection.h"
+#include "brave/components/constants/trace_tools.h"
 #include "brave/components/brave_news/common/buildflags/buildflags.h"
 #include "brave/components/brave_rewards/core/pref_names.h"
 #include "brave/components/brave_shields/core/common/pref_names.h"
@@ -105,6 +106,10 @@ const PrefsUtil::TypedPrefMap& BravePrefsUtil::GetAllowlistedKeys() {
   // Enhanced Phishing Protection
   (*s_brave_allowlist)[kEnhancedPhishingProtectionEnabled] =
       settings_api::PrefType::kBoolean;
+  // Trace tools MCP server (local_state prefs).
+  (*s_brave_allowlist)[kTraceToolsMcpEnabled] =
+      settings_api::PrefType::kBoolean;
+  (*s_brave_allowlist)[kTraceToolsMcpPort] = settings_api::PrefType::kNumber;
   // Default Brave shields
   (*s_brave_allowlist)[kShieldsAdvancedViewEnabled] =
       settings_api::PrefType::kBoolean;

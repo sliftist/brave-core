@@ -63,6 +63,27 @@
   sub-label="$i18n{enhancedPhishingProtectionSubLabel}">
 </settings-toggle-button>
 <settings-toggle-button
+  id="traceToolsMcpToggle"
+  class="cr-row"
+  pref="{{prefs.brave.trace_tools.mcp_enabled}}"
+  label="$i18n{traceToolsMcpLabel}"
+  sub-label="$i18n{traceToolsMcpSubLabel}">
+</settings-toggle-button>
+<div class="settings-box continuation"
+    hidden="[[!prefs.brave.trace_tools.mcp_enabled.value]]">
+  <div class="flex cr-padded-text">
+    <div>$i18n{traceToolsMcpPortLabel}</div>
+  </div>
+  <cr-input
+    id="traceToolsMcpPort"
+    type="number"
+    min="1"
+    max="65535"
+    value="[[prefs.brave.trace_tools.mcp_port.value]]"
+    on-change="onMcpPortChange_">
+  </cr-input>
+</div>
+<settings-toggle-button
   class="cr-row"
   pref="{{prefs.brave.reduce_language}}"
   label="$i18n{reduceLanguageControlLabel}"
