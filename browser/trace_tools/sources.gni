@@ -6,6 +6,8 @@
 brave_browser_trace_tools_sources = [
   "//brave/browser/trace_tools/brave_trace_service.cc",
   "//brave/browser/trace_tools/brave_trace_service.h",
+  "//brave/browser/trace_tools/mcp_server.cc",
+  "//brave/browser/trace_tools/mcp_server.h",
   "//brave/browser/trace_tools/network_trace_recorder.cc",
   "//brave/browser/trace_tools/network_trace_recorder.h",
   "//brave/browser/trace_tools/tab_trace_session.cc",
@@ -19,6 +21,7 @@ brave_browser_trace_tools_sources = [
 brave_browser_trace_tools_deps = [
   "//base",
   "//brave/components/constants",
+  "//components/prefs",
   "//components/version_info",
   "//content/public/browser",
   "//net",

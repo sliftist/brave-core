@@ -5,8 +5,16 @@
 
 #include "brave/browser/trace_tools/brave_trace_service.h"
 
+#include <utility>
+
+#include "base/functional/bind.h"
+#include "base/task/sequenced_task_runner.h"
 #include "base/task/thread_pool.h"
+#include "brave/browser/trace_tools/mcp_server.h"
 #include "brave/browser/trace_tools/network_trace_recorder.h"
+#include "brave/components/constants/trace_tools.h"
+#include "chrome/browser/browser_process.h"
+#include "components/prefs/pref_service.h"
 
 namespace trace_tools {
 
@@ -51,9 +59,45 @@ bool BraveTraceService::IsDomainTraced(const std::string& domain) const {
   return recorder_ && recorder_->IsDomainTraced(domain);
 }
 
+void BraveTraceService::EnsureMcpServer() {
+  if (mcp_server_) {
+    return;
+  }
+  int port = kTraceToolsDefaultMcpPort;
+  if (PrefService* local_state = g_browser_process->local_state()) {
+    if (!local_state->GetBoolean(kTraceToolsMcpEnabled)) {
+      return;
+    }
+    port = local_state->GetInteger(kTraceToolsMcpPort);
+  }
+  mcp_server_ = std::make_unique<MCPServer>(
+      static_cast<uint16_t>(port),
+      base::SequencedTaskRunner::GetCurrentDefault(),
+      base::BindRepeating(&BraveTraceService::OnMcpPortBound,
+                          weak_factory_.GetWeakPtr()),
+      base::BindRepeating(&BraveTraceService::OnMcpSessionCountChanged,
+                          weak_factory_.GetWeakPtr()));
+}
+
+void BraveTraceService::OnMcpPortBound(uint16_t port) {
+  mcp_port_ = port;
+  NotifyMcpStateChanged();
+}
+
+void BraveTraceService::OnMcpSessionCountChanged(int count) {
+  mcp_session_count_ = count;
+  NotifyMcpStateChanged();
+}
+
 void BraveTraceService::NotifyStateChanged() {
   for (Observer& observer : observers_) {
     observer.OnTraceStateChanged();
+  }
+}
+
+void BraveTraceService::NotifyMcpStateChanged() {
+  for (Observer& observer : observers_) {
+    observer.OnMcpStateChanged();
   }
 }
 

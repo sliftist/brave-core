@@ -24,6 +24,7 @@
 #include "brave/browser/ui/views/location_bar/brave_location_bar_view.h"
 #include "brave/browser/ui/views/tabs/vertical_tab_utils.h"
 #include "brave/browser/ui/views/toolbar/bookmark_button.h"
+#include "brave/browser/ui/views/toolbar/mcp_indicator_view.h"
 #include "brave/browser/ui/views/toolbar/trace_toolbar_button.h"
 #include "brave/browser/ui/views/toolbar/side_panel_button.h"
 #include "brave/components/ai_chat/core/common/buildflags/buildflags.h"
@@ -323,6 +324,11 @@ void BraveToolbarView::Init() {
       std::make_unique<TraceToolbarButton>(browser_),
       *GetIndexOf(location_bar_view_));
   SetBraveButtonFlexBehavior(trace_button_);
+
+  // MCP connection indicator sits just right of the Trace button.
+  mcp_indicator_ = AddChildViewAt(std::make_unique<MCPIndicatorView>(browser_),
+                                  *GetIndexOf(location_bar_view_));
+  SetBraveButtonFlexBehavior(mcp_indicator_);
 
   side_panel_ = AddChildViewAt(std::make_unique<SidePanelButton>(browser()),
                                *GetIndexOf(app_menu_button()) - 1);

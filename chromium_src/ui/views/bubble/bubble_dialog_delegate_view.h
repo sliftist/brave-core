@@ -10,6 +10,7 @@
 
 class BraveNewsBubbleView;
 class BraveHelpBubbleDelegateView;
+class MCPCopyBubble;
 class SplitViewMenuBubble;
 class WaybackMachineBubbleView;
 class SidebarItemAddedFeedbackBubble;
@@ -28,6 +29,7 @@ class BraveBubbleDialogDelegateView;
   CreatePassKey_Unused();                              \
   friend class ::BraveNewsBubbleView;                  \
   friend class ::BraveHelpBubbleDelegateView;          \
+  friend class ::MCPCopyBubble;                        \
   friend class ::WaybackMachineBubbleView;             \
   friend class ::playlist::PlaylistBubbleView;         \
   friend class ::SplitViewMenuBubble;                  \
